@@ -1,0 +1,14 @@
+.mandatoryClass,.error{
+	color:red;
+}
+.custom-btn {
+	background-color: #971425 !important;
+    border-color: #8e1424 !important;
+}
+.custom-btn:hover {
+	background-color: #650e19 !important;
+    border-color: #560b15 !important;
+}
+.select2-container{
+	width: 100% !important;
+}

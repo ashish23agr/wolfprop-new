@@ -271,8 +271,8 @@ class LeadsController extends Controller {
                         $matchedCount = $query->count();
                         /*    matched properties counts end here */
 
-                        $actions = "<a title=\"View Lead\" href=\"" . route('leads.show', ['id' => $users->id]) . "\" class=\"btn btn-xs btn-success btn-flat info-btn\"><i class=\" fa fa-eye\"></i> View</a>&nbsp;";
-                        $actions .= "<a title=\"Update Lead Detail\" href=\"" . route('leads.edit', ['id' => $users->id]) . "\" class=\"btn btn-xs btn-warning btn-flat info-btn\"><i class=\"glyphicon glyphicon-edit\"></i> Edit</a>&nbsp;";
+                        $actions = "<a title=\"View Lead\" href=\"" . route('leads.show', $users->id) . "\" class=\"btn btn-xs btn-success btn-flat info-btn\"><i class=\" fa fa-eye\"></i> View</a>&nbsp;";
+                        $actions .= "<a title=\"Update Lead Detail\" href=\"" . route('leads.edit', $users->id) . "\" class=\"btn btn-xs btn-warning btn-flat info-btn\"><i class=\"glyphicon glyphicon-edit\"></i> Edit</a>&nbsp;";
                         $actions .= "<a title=\"Delete Lead\" onclick=\"return confirm('Are you sure want to delete the Lead?')\" href=\"" . url('delete-lead?id=' . $users->id) . "\" class=\"btn btn-xs btn-danger btn-flat info-btn\"><i class=\"glyphicon glyphicon-trash\"></i> Delete</a>&nbsp;";
                         $actions .= "<a title=\"Matches\" href=\"" . url('matched-properties?id=' . $users->id) . "\" class=\"btn btn-xs btn-primary btn-flat info-btn\"><i class=\"fa fa-tasks\"></i> Matches ($matchedCount)</a> &nbsp;";
                         $actions .= "<a title=\"Bookmarked\"  href=\"" . url('bookmarked-properties?lead-id=' . $users->id) . "\" class=\"btn btn-xs btn-warning btn-flat info-btn\"><i class=\"fa fa-bookmark\"></i> Bookmarked ($bookmarkedCount)</a>&nbsp;";
@@ -287,6 +287,11 @@ class LeadsController extends Controller {
             ->filterColumn('full_name', function ($query, $keyword) {
                         $keywords = trim($keyword);
                         $query->whereRaw("CONCAT(first_name, last_name) like ?", ["%{$keywords}%"]);
+                    })
+            ->filterColumn('lead_detail.category', function ($query, $keyword) {
+                        $query->whereHas('leadDetail', function ($q) use ($keyword) {
+                            $q->where('category', 'like', "%{$keyword}%");
+                        });
                     })
             ->make(true);
     }
@@ -1226,7 +1231,7 @@ class LeadsController extends Controller {
         $leads = $query->with('leadDetail')->orderBy('created_at', 'DESC');
 
         return datatables()->of($leads)->addColumn('action', function ($leads)use ($request) {
-                                    $actions = "<a title=\"View Lead\" href=\"" . route('leads.show', ['id' => $leads->id]) . "\" class=\"btn btn-xs btn-success btn-flat info-btn\"><i class=\" fa fa-eye\"></i> View</a>&nbsp;";
+                                    $actions = "<a title=\"View Lead\" href=\"" . route('leads.show', $leads->id) . "\" class=\"btn btn-xs btn-success btn-flat info-btn\"><i class=\" fa fa-eye\"></i> View</a>&nbsp;";
                                     return $actions;
                                 })->addColumn('full_name', function($row) {
                                     return ucwords(strtolower($row->first_name . ' ' . $row->last_name));
