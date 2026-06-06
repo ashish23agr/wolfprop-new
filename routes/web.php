@@ -10,7 +10,7 @@ use App\Http\Controllers\LeadsController;
 */
 
 // Requires laravel/ui package (see guide). Provides login/register/logout routes.
-//Auth::routes();
+//Auth::routes(); 
 
 // Routes for any authenticated user (admin & agent)
 Route::middleware(['auth'])->group(function () {
