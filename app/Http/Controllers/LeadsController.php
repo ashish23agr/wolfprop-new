@@ -293,6 +293,25 @@ class LeadsController extends Controller {
                             $q->where('category', 'like', "%{$keyword}%");
                         });
                     })
+            ->filterColumn('lead_status_label', function ($query, $keyword) {
+                        // lead_status_label is an accessor; search the real lead_status column.
+                        $map = [
+                            'completed' => 1, 'backup' => 2, 'hot' => 3,
+                            'cold' => 4, 'followup' => 5, 'active' => 6,
+                        ];
+                        $kw = strtolower(trim($keyword));
+                        $matched = [];
+                        foreach ($map as $label => $val) {
+                            if ($kw !== '' && strpos($label, $kw) !== false) {
+                                $matched[] = $val;
+                            }
+                        }
+                        if (!empty($matched)) {
+                            $query->whereIn('lead_status', $matched);
+                        } else {
+                            $query->whereRaw('1 = 0');
+                        }
+                    })
             ->make(true);
     }
 
@@ -437,7 +456,7 @@ class LeadsController extends Controller {
                 $request->request->add(['user_id' => Auth::user()->ID]); //add request
             }
             $input = $request->all();
-            if ($leadUpdate->user_id != $input['user_id']) {
+            if ($leadUpdate->user_id != ($input['user_id'] ?? null)) {
                 LeadAction::where('lead_id', $leadUpdate->id)->delete();
             }
             if ($leadUpdate->fill($input)->save()) {
